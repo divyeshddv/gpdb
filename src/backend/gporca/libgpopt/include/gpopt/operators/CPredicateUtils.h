@@ -57,6 +57,9 @@ namespace gpopt
 			// check if given expression is a comparison over the given column
 			static
 			BOOL FComparison(CExpression *pexpr, CColRef *colref, CColRefSet *pcrsAllowedRefs);
+        
+            static
+            BOOL FScalarFuncComparison(CExpression *pexpr, CColRef *colref, CColRefSet *pcrsAllowedRefs);
 
 			// check whether the given expression contains references to only the given
 			// columns. If pcrsAllowedRefs is NULL, then check whether the expression has

@@ -154,55 +154,26 @@ CPredicateUtils::FComparison
 	CExpression *pexprRight = (*pexpr)[1];
 
 	if (CUtils::FScalarIdent(pexprLeft, colref) ||
-		CScalarIdent::FCastedScId(pexprLeft, colref))
+		CScalarIdent::FCastedScId(pexprLeft, colref) ||
+        (!FContainsVolatileFunction(pexprLeft) &&
+         (pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
+        ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+        (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == colref)))
 	{
 		return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
 	}
 
 	if (CUtils::FScalarIdent(pexprRight, colref) ||
-		CScalarIdent::FCastedScId(pexprRight, colref))
+		CScalarIdent::FCastedScId(pexprRight, colref) ||
+        (!FContainsVolatileFunction(pexprRight) &&
+         (pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
+        ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+        (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == colref)))
 	{
 		return FValidRefsOnly(pexprLeft, pcrsAllowedRefs);
 	}
 
 	return false;
-}
-
-BOOL
-CPredicateUtils::FScalarFuncComparison
-    (
-    CExpression *pexpr,
-    CColRef *colref,
-    CColRefSet *pcrsAllowedRefs // other column references allowed in the comparison
-    )
-{
-    GPOS_ASSERT(NULL != pexpr);
-
-    if (COperator::EopScalarCmp != pexpr->Pop()->Eopid())
-    {
-        return false;
-    }
-
-    CExpression *pexprLeft = (*pexpr)[0];
-    CExpression *pexprRight = (*pexpr)[1];
-
-    if (CUtils::FScalarIdent(pexprLeft, colref) ||
-        ((pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
-         ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-         (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == colref)))
-    {
-        return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
-    }
-
-    if (CUtils::FScalarIdent(pexprRight, colref) ||
-        ((pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
-         ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-         (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == colref)))
-    {
-        return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
-    }
-
-    return false;
 }
 
 // Is the given expression a range comparison only between the given column and
@@ -730,9 +701,9 @@ CPredicateUtils::ExtractComponents
 	}
 	else if (CUtils::FScalarIdent(pexprRight, pcrKey) ||
 			 CScalarIdent::FCastedScId(pexprRight, pcrKey) ||
-             ((pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
-             ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-             (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == pcrKey)))
+             ((pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
+             ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
+             (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == pcrKey)))
 	{
 		*ppexprKey = pexprRight;
 		*ppexprOther = pexprLeft;
@@ -1525,10 +1496,7 @@ CPredicateUtils::PexprPartPruningPredicate
 				FNullCheckOnColumn(pexpr, pcrPartKey) ||
 				IsDisjunctionOfRangeComparison(mp, pexpr, pcrPartKey, pcrsAllowedRefs) ||
 				(FRangeComparison(pexpr, pcrPartKey, pcrsAllowedRefs) &&
-				 !pexpr->DeriveScalarFunctionProperties()->NeedsSingletonExecution()) ||
-                // allow non-volatile scalarfuncs such as (cast timestamp to date)
-                (!FContainsVolatileFunction(pexpr) &&
-                 FScalarFuncComparison(pexpr, pcrPartKey, pcrsAllowedRefs)))
+                !pexpr->DeriveScalarFunctionProperties()->NeedsSingletonExecution()))
 			{
 				pexpr->AddRef();
 				pdrgpexprResult->Append(pexpr);

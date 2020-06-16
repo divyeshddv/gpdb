@@ -27,11 +27,13 @@ using namespace gpmd;
 CMDIdCast::CMDIdCast
 	(
 	CMDIdGPDB *mdid_src,
-	CMDIdGPDB *mdid_dest
+	CMDIdGPDB *mdid_dest,
+    BOOL allowassignment
 	)
 	:
 	m_mdid_src(mdid_src),
 	m_mdid_dest(mdid_dest),
+    m_allow_assignment(allowassignment),
 	m_str(m_mdid_buffer, GPOS_ARRAY_SIZE(m_mdid_buffer))
 {
 	GPOS_ASSERT(mdid_src->IsValid());
@@ -120,6 +122,12 @@ IMDId *
 CMDIdCast::MdidDest() const
 {
 	return m_mdid_dest;
+}
+
+BOOL
+CMDIdCast::isAssignmentAllowed() const
+{
+    return m_allow_assignment;
 }
 
 //---------------------------------------------------------------------------

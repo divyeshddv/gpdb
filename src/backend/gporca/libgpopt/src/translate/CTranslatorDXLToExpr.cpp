@@ -2954,7 +2954,7 @@ CTranslatorDXLToExpr::PexprScalarFunc
 		}
 	}
 
-	if (CTranslatorDXLToExprUtils::FCastFunc(m_pmda, pdxlnFunc, pmdidInput))
+	if (CTranslatorDXLToExprUtils::FCastFunc(m_pmda, pdxlnFunc, pmdidInput)) // check for implicit casts
 	{
 		const IMDCast *pmdcast = m_pmda->Pmdcast(pmdidInput, mdid_return_type);
 
@@ -2982,9 +2982,40 @@ CTranslatorDXLToExpr::PexprScalarFunc
 					pmdcast->IsBinaryCoercible()
 					);
 		}
+        
 	}
-	else
+    else if(CTranslatorDXLToExprUtils::FCastFunc(m_pmda, pdxlnFunc, pmdidInput, true)) //check assignment cast
+    {
+        const IMDCast *pmdcast = m_pmda->Pmdcast(pmdidInput, mdid_return_type, true);
+
+        if (pmdcast->GetMDPathType() == IMDCast::EmdtArrayCoerce)
+        {
+            CMDArrayCoerceCastGPDB *parrayCoerceCast = (CMDArrayCoerceCastGPDB *) pmdcast;
+            pop = GPOS_NEW(m_mp) CScalarArrayCoerceExpr
+                    (
+                    m_mp,
+                    parrayCoerceCast->GetCastFuncMdId(),
+                    mdid_return_type,
+                    parrayCoerceCast->TypeModifier(),
+                    parrayCoerceCast->IsExplicit(),
+                    (COperator::ECoercionForm) parrayCoerceCast->GetCoercionForm(),
+                    parrayCoerceCast->Location()
+                    );
+        }
+        else
+        {
+            pop = GPOS_NEW(m_mp) CScalarCast
+                    (
+                    m_mp,
+                    mdid_return_type,
+                    mdid_func,
+                    pmdcast->IsBinaryCoercible()
+                    );
+        }
+    }
+    else
 	{
+        
 		pop = GPOS_NEW(m_mp) CScalarFunc
 				(
 				m_mp,

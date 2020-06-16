@@ -2673,6 +2673,7 @@ CTranslatorRelcacheToDXL::RetrieveCast
 	CMDIdCast *mdid_cast = CMDIdCast::CastMdid(mdid);
 	IMDId *mdid_src = mdid_cast->MdidSrc();
 	IMDId *mdid_dest = mdid_cast->MdidDest();
+    bool allowassignment = mdid_cast->isAssignmentAllowed();
 	IMDCast::EmdCoercepathType coercePathType;
 
 	OID src_oid = CMDIdGPDB::CastMdid(mdid_src)->Oid();
@@ -2682,7 +2683,7 @@ CTranslatorRelcacheToDXL::RetrieveCast
 	OID cast_fn_oid = 0;
 	BOOL is_binary_coercible = false;
 	
-	BOOL cast_exists = gpdb::GetCastFunc(src_oid, dest_oid, &is_binary_coercible, &cast_fn_oid, &pathtype);
+	BOOL cast_exists = gpdb::GetCastFunc(src_oid, dest_oid, &is_binary_coercible, &cast_fn_oid, &pathtype, allowassignment);
 	
 	if (!cast_exists)
 	{

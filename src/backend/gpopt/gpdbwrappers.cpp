@@ -1016,13 +1016,14 @@ gpdb::GetCastFunc
 	Oid dest_oid,
 	bool *is_binary_coercible,
 	Oid *cast_fn_oid,
-	CoercionPathType *pathtype
+	CoercionPathType *pathtype,
+    bool allowassignment
 	)
 {
 	GP_WRAP_START;
 	{
 		/* catalog tables: pg_cast */
-		return get_cast_func(src_oid, dest_oid, is_binary_coercible, cast_fn_oid, pathtype);
+		return get_cast_func(src_oid, dest_oid, is_binary_coercible, cast_fn_oid, pathtype, allowassignment);
 	}
 	GP_WRAP_END;
 	return false;

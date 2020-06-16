@@ -37,7 +37,8 @@ CMDCastGPDB::CMDCastGPDB
 	IMDId *mdid_dest,
 	BOOL is_binary_coercible,
 	IMDId *mdid_cast_func,
-	EmdCoercepathType path_type
+	EmdCoercepathType path_type,
+    BOOL allowassignment
 	)
 	:
 	m_mp(mp),
@@ -45,6 +46,7 @@ CMDCastGPDB::CMDCastGPDB
 	m_mdname(mdname),
 	m_mdid_src(mdid_src),
 	m_mdid_dest(mdid_dest),
+    m_allow_assignment(allowassignment),
 	m_is_binary_coercible(is_binary_coercible),
 	m_mdid_cast_func(mdid_cast_func),
 	m_path_type(path_type)
@@ -166,6 +168,13 @@ IMDCast::EmdCoercepathType
 CMDCastGPDB::GetMDPathType() const
 {
 	return m_path_type;
+}
+
+//return true if assignment casts are allowed
+BOOL
+CMDCastGPDB::IsAssignmentAllowed() const
+{
+    return m_allow_assignment;
 }
 
 //---------------------------------------------------------------------------

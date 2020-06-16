@@ -354,7 +354,8 @@ CMDAccessorUtils::FCastExists
 	(
 	CMDAccessor *md_accessor,
 	IMDId *mdid_src,
-	IMDId *mdid_dest
+	IMDId *mdid_dest,
+    BOOL allowassignment
 	)
 {
 	GPOS_ASSERT(NULL != md_accessor);
@@ -368,7 +369,7 @@ CMDAccessorUtils::FCastExists
 
 	GPOS_TRY
 	{
-		(void) md_accessor->Pmdcast(mdid_src, mdid_dest);
+		(void) md_accessor->Pmdcast(mdid_src, mdid_dest, allowassignment);
 
 		return true;
 	}
@@ -381,6 +382,7 @@ CMDAccessorUtils::FCastExists
 	}
 	GPOS_CATCH_END;
 }
+
 
 
 //---------------------------------------------------------------------------

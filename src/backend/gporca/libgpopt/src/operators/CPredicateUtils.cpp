@@ -160,6 +160,11 @@ CPredicateUtils::FComparison
         ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
         (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == colref)))
 	{
+        //CScalarFunc *pScalarFunc = CScalarFunc::PopConvert(pexprLeft->Pop());
+        //OID poid = CMDIdGPDB::CastMdid(pScalarFunc->FuncMdId())->Oid();
+        //if (poid == 317){
+        //    return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
+        //}
 		return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
 	}
 
@@ -1500,7 +1505,7 @@ CPredicateUtils::PexprPartPruningPredicate
 			{
 				pexpr->AddRef();
 				pdrgpexprResult->Append(pexpr);
-			}
+			} 
 		}
 	}
 

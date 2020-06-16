@@ -1031,7 +1031,8 @@ const IMDCast *
 CMDAccessor::Pmdcast
 	(
 	IMDId *mdid_src,
-	IMDId *mdid_dest
+	IMDId *mdid_dest,
+    BOOL allowassignment
 	)
 {	
 	GPOS_ASSERT(NULL != mdid_src);
@@ -1041,7 +1042,7 @@ CMDAccessor::Pmdcast
 	mdid_dest->AddRef();
 	
 	CAutoP<IMDId> a_pmdidCast;
-	a_pmdidCast = GPOS_NEW(m_mp) CMDIdCast(CMDIdGPDB::CastMdid(mdid_src), CMDIdGPDB::CastMdid(mdid_dest));
+	a_pmdidCast = GPOS_NEW(m_mp) CMDIdCast(CMDIdGPDB::CastMdid(mdid_src), CMDIdGPDB::CastMdid(mdid_dest), allowassignment);
 	
 	const IMDCacheObject *pmdobj = GetImdObj(a_pmdidCast.Value());
 		

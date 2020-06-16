@@ -235,7 +235,7 @@ extern GpPolicy *relation_policy(Relation rel);
 extern bool child_distribution_mismatch(Relation rel);
 extern bool child_triggers(Oid relationId, int32 triggerType);
 
-extern bool get_cast_func(Oid oidSrc, Oid oidDest, bool *is_binary_coercible, Oid *oidCastFunc, CoercionPathType *pathtype);
+extern bool get_cast_func(Oid oidSrc, Oid oidDest, bool *is_binary_coercible, Oid *oidCastFunc, CoercionPathType *pathtype, bool allowassignment);
 
 extern Oid get_comparison_operator(Oid oidLeft, Oid oidRight, CmpType cmpt);
 extern CmpType get_comparison_type(Oid oidOp);

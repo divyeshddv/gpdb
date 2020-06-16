@@ -154,26 +154,13 @@ CPredicateUtils::FComparison
 	CExpression *pexprRight = (*pexpr)[1];
 
 	if (CUtils::FScalarIdent(pexprLeft, colref) ||
-		CScalarIdent::FCastedScId(pexprLeft, colref) ||
-        (!FContainsVolatileFunction(pexprLeft) &&
-         (pexprLeft->Pop()->Eopid() == COperator::EopScalarFunc) &&
-        ((*pexprLeft)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-        (CScalarIdent::PopConvert((*pexprLeft)[0]->Pop())->Pcr() == colref)))
+		CScalarIdent::FCastedScId(pexprLeft, colref))
 	{
-        //CScalarFunc *pScalarFunc = CScalarFunc::PopConvert(pexprLeft->Pop());
-        //OID poid = CMDIdGPDB::CastMdid(pScalarFunc->FuncMdId())->Oid();
-        //if (poid == 317){
-        //    return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
-        //}
 		return FValidRefsOnly(pexprRight, pcrsAllowedRefs);
 	}
 
 	if (CUtils::FScalarIdent(pexprRight, colref) ||
-		CScalarIdent::FCastedScId(pexprRight, colref) ||
-        (!FContainsVolatileFunction(pexprRight) &&
-         (pexprRight->Pop()->Eopid() == COperator::EopScalarFunc) &&
-        ((*pexprRight)[0]->Pop()->Eopid() == COperator::EopScalarIdent) &&
-        (CScalarIdent::PopConvert((*pexprRight)[0]->Pop())->Pcr() == colref)))
+		CScalarIdent::FCastedScId(pexprRight, colref))
 	{
 		return FValidRefsOnly(pexprLeft, pcrsAllowedRefs);
 	}

@@ -250,7 +250,7 @@ namespace gpdb {
 	Node *GetRelationPartContraints(Oid rel_oid, List **default_levels);
 
 	// get the cast function for the specified source and destination types
-	bool GetCastFunc(Oid src_oid, Oid dest_oid, bool *is_binary_coercible, Oid *cast_fn_oid, CoercionPathType *pathtype, bool allowassignment = false);
+	bool GetCastFunc(Oid src_oid, Oid dest_oid, bool *is_binary_coercible, Oid *cast_fn_oid, CoercionPathType *pathtype, CoercionContext *castcontext );
 	
 	// get type of operator
 	unsigned int GetComparisonType(Oid op_oid);

@@ -2673,7 +2673,6 @@ CTranslatorRelcacheToDXL::RetrieveCast
 	CMDIdCast *mdid_cast = CMDIdCast::CastMdid(mdid);
 	IMDId *mdid_src = mdid_cast->MdidSrc();
 	IMDId *mdid_dest = mdid_cast->MdidDest();
-    bool allowassignment = mdid_cast->isAssignmentAllowed();
 	IMDCast::EmdCoercepathType coercePathType;
 
 	OID src_oid = CMDIdGPDB::CastMdid(mdid_src)->Oid();
@@ -2682,9 +2681,9 @@ CTranslatorRelcacheToDXL::RetrieveCast
 
 	OID cast_fn_oid = 0;
 	BOOL is_binary_coercible = false;
+    CoercionContext coercion_context;
 	
-	BOOL cast_exists = gpdb::GetCastFunc(src_oid, dest_oid, &is_binary_coercible, &cast_fn_oid, &pathtype, allowassignment);
-	
+	BOOL cast_exists = gpdb::GetCastFunc(src_oid, dest_oid, &is_binary_coercible, &cast_fn_oid, &pathtype, &coercion_context);
 	if (!cast_exists)
 	{
 		GPOS_RAISE(gpdxl::ExmaMD, gpdxl::ExmiMDCacheEntryNotFound, mdid->GetBuffer());
@@ -2711,16 +2710,39 @@ CTranslatorRelcacheToDXL::RetrieveCast
 	mdid_dest->AddRef();
 
 	CMDName *mdname = CDXLUtils::CreateMDNameFromCharArray(mp, func_name);
+    
+    IMDCast::EmdCoerceContext cast_context = IMDCast::EmdtNoContext;
+    switch (coercion_context) {
+        case COERCION_IMPLICIT:
+        {
+            cast_context = IMDCast::EmdtImplicit;
+        }
+            break;
+        case COERCION_ASSIGNMENT:
+        {
+            cast_context = IMDCast::EmdtAssignment;
+        }
+            break;
+        case COERCION_EXPLICIT:
+        {
+            cast_context = IMDCast::EmdtExplicit;
+        }
+            break;
+        default:
+            break;
+    }
 	
 	switch (pathtype) {
 		case COERCION_PATH_ARRAYCOERCE:
 		{
 			coercePathType = IMDCast::EmdtArrayCoerce;
-			return GPOS_NEW(mp) CMDArrayCoerceCastGPDB(mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, GPOS_NEW(mp) CMDIdGPDB(cast_fn_oid), IMDCast::EmdtArrayCoerce, default_type_modifier, false, EdxlcfImplicitCast, -1);
+			return GPOS_NEW(mp) CMDArrayCoerceCastGPDB(mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, GPOS_NEW(mp) CMDIdGPDB(cast_fn_oid), IMDCast::EmdtArrayCoerce, default_type_modifier, false, EdxlcfImplicitCast, -1, cast_context);
 		}
 			break;
 		case COERCION_PATH_FUNC:
-			return GPOS_NEW(mp) CMDCastGPDB(mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, GPOS_NEW(mp) CMDIdGPDB(cast_fn_oid), IMDCast::EmdtFunc);
+        {
+            return GPOS_NEW(mp) CMDCastGPDB(mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, GPOS_NEW(mp) CMDIdGPDB(cast_fn_oid), IMDCast::EmdtFunc, cast_context);
+        }
 			break;
 		case COERCION_PATH_RELABELTYPE:
 			// binary-compatible cast, no function

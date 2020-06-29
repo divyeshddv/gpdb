@@ -43,6 +43,16 @@ namespace gpmd
 				EmdtRelabelType,	/* binary-compatible cast, no function */
 				EmdtArrayCoerce		/* need an ArrayCoerceExpr node */
 			};
+        
+            // coercion context
+            enum EmdCoerceContext
+            {
+                EmdtNoContext,        /* found no coercion path */
+                EmdtImplicit,        /* found an implicit coercion */
+                EmdtAssignment,      /* found an assignment coercion */
+                EmdtExplicit         /* found an explicit coercion */
+            };
+        
 
 			// object type
 			virtual
@@ -70,6 +80,10 @@ namespace gpmd
 			// return the coercion path type
 			virtual
 			EmdCoercepathType GetMDPathType() const = 0;
+        
+            // return the coercion path type
+            virtual
+            EmdCoerceContext GetMDContext() const = 0;
 	};
 		
 }

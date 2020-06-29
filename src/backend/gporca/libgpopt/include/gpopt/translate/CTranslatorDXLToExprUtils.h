@@ -97,7 +97,7 @@ namespace gpopt
 
 			// is the given expression is a scalar function that casts
 			static
-			BOOL FCastFunc(CMDAccessor *md_accessor, const CDXLNode *dxlnode, IMDId *pmdidInput, BOOL allowassignment = false);
+			BOOL FCastFunc(CMDAccessor *md_accessor, const CDXLNode *dxlnode, IMDId *pmdidInput);
 	};
 }
 

@@ -2178,6 +2178,47 @@ IsBinaryCoercible(Oid srctype, Oid targettype)
  * apply domain constraint checking.  If you want to check for a zero-effort
  * conversion then use IsBinaryCoercible().
  */
+CoercionContext
+find_coercion_context(Oid targetTypeId, Oid sourceTypeId)
+{
+    HeapTuple    tuple;
+    CoercionContext castcontext = 0;
+
+    /* Perhaps the types are domains; if so, look at their base types */
+    if (OidIsValid(sourceTypeId))
+        sourceTypeId = getBaseType(sourceTypeId);
+    if (OidIsValid(targetTypeId))
+        targetTypeId = getBaseType(targetTypeId);
+
+    /* Look in pg_cast */
+    tuple = SearchSysCache2(CASTSOURCETARGET,
+                            ObjectIdGetDatum(sourceTypeId),
+                            ObjectIdGetDatum(targetTypeId));
+
+    if (HeapTupleIsValid(tuple))
+    {
+        Form_pg_cast castForm = (Form_pg_cast) GETSTRUCT(tuple);
+        /* convert char value for castcontext to CoercionContext enum */
+        switch (castForm->castcontext)
+        {
+            case COERCION_CODE_IMPLICIT:
+                castcontext = COERCION_IMPLICIT;
+                break;
+            case COERCION_CODE_ASSIGNMENT:
+                castcontext = COERCION_ASSIGNMENT;
+                break;
+            case COERCION_CODE_EXPLICIT:
+                castcontext = COERCION_EXPLICIT;
+                break;
+            default:
+                elog(ERROR, "unrecognized castcontext: %d",
+                     (int) castForm->castcontext);
+                castcontext = 0;    /* keep compiler quiet */
+                break;
+        }
+    }
+    return castcontext;
+}
 CoercionPathType
 find_coercion_pathway(Oid targetTypeId, Oid sourceTypeId,
 					  CoercionContext ccontext,

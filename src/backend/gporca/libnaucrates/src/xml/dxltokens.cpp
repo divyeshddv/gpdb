@@ -653,6 +653,7 @@ CDXLTokens::Init
 			{EdxltokenGPDBCastFuncId, GPOS_WSZ_LIT("CastFuncId")},
 			{EdxltokenGPDBCastCoercePathType, GPOS_WSZ_LIT("CoercePathType")},
 			{EdxltokenGPDBArrayCoerceCast, GPOS_WSZ_LIT("ArrayCoerceCast")},
+            {EdxltokenGPDBCoerceContext, GPOS_WSZ_LIT("CoerceContext")},
 			
 			{EdxltokenGPDBMDScCmp, GPOS_WSZ_LIT("MDScalarComparison")},
 			

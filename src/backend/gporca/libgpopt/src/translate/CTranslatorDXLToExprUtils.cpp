@@ -282,8 +282,7 @@ CTranslatorDXLToExprUtils::FCastFunc
 	(
 	CMDAccessor *md_accessor,
 	const CDXLNode *dxlnode,
-	IMDId *pmdidInput,
-    BOOL allowassignment
+	IMDId *pmdidInput
     )
 {
 	GPOS_ASSERT(NULL != dxlnode);
@@ -307,12 +306,12 @@ CTranslatorDXLToExprUtils::FCastFunc
 
 	IMDId *mdid_dest = pdxlopScFunc->ReturnTypeMdId();
 
-	if(!CMDAccessorUtils::FCastExists(md_accessor, pmdidInput, mdid_dest, allowassignment))
+	if(!CMDAccessorUtils::FCastExists(md_accessor, pmdidInput, mdid_dest))
 	{
 		return false;
 	}
 
-	const IMDCast *pmdcast = md_accessor->Pmdcast(pmdidInput, mdid_dest, allowassignment);
+	const IMDCast *pmdcast = md_accessor->Pmdcast(pmdidInput, mdid_dest);
 
 	return (pmdcast->GetCastFuncMdId()->Equals(pdxlopScFunc->FuncMdId()));
 }

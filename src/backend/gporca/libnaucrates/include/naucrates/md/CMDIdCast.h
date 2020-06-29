@@ -42,10 +42,6 @@ namespace gpmd
 			
 			// mdid of destinatin type
 			CMDIdGPDB *m_mdid_dest;
-            
-            //flag to allow assignment casts
-            bool m_allow_assignment;
-
 			
 			// buffer for the serialized mdid
 			WCHAR m_mdid_buffer[GPDXL_MDID_LENGTH];
@@ -61,7 +57,7 @@ namespace gpmd
 			
 		public:
 			// ctor
-			CMDIdCast(CMDIdGPDB *mdid_src, CMDIdGPDB *mdid_dest, BOOL allowassignment = false);
+			CMDIdCast(CMDIdGPDB *mdid_src, CMDIdGPDB *mdid_dest);
 			
 			// dtor
 			virtual
@@ -89,9 +85,6 @@ namespace gpmd
 
 			// destination type id
 			IMDId *MdidDest() const;
-        
-            //is assignment casts allowed
-            BOOL isAssignmentAllowed() const;
 			
 			// equality check
 			virtual

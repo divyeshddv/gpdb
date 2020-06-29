@@ -38,7 +38,7 @@ CMDCastGPDB::CMDCastGPDB
 	BOOL is_binary_coercible,
 	IMDId *mdid_cast_func,
 	EmdCoercepathType path_type,
-    BOOL allowassignment
+    EmdCoerceContext castcontext
 	)
 	:
 	m_mp(mp),
@@ -46,10 +46,11 @@ CMDCastGPDB::CMDCastGPDB
 	m_mdname(mdname),
 	m_mdid_src(mdid_src),
 	m_mdid_dest(mdid_dest),
-    m_allow_assignment(allowassignment),
+    m_cast_context(castcontext),
 	m_is_binary_coercible(is_binary_coercible),
 	m_mdid_cast_func(mdid_cast_func),
 	m_path_type(path_type)
+    
 {
 	GPOS_ASSERT(m_mdid->IsValid());
 	GPOS_ASSERT(m_mdid_src->IsValid());
@@ -163,18 +164,18 @@ CMDCastGPDB::IsBinaryCoercible() const
 	return m_is_binary_coercible;
 }
 
+// returns coercion context
+IMDCast::EmdCoerceContext
+CMDCastGPDB::GetMDContext() const
+{
+	return m_cast_context;
+}
+
 // returns coercion path type
 IMDCast::EmdCoercepathType
 CMDCastGPDB::GetMDPathType() const
 {
-	return m_path_type;
-}
-
-//return true if assignment casts are allowed
-BOOL
-CMDCastGPDB::IsAssignmentAllowed() const
-{
-    return m_allow_assignment;
+    return m_path_type;
 }
 
 //---------------------------------------------------------------------------
@@ -204,7 +205,7 @@ CMDCastGPDB::Serialize
 	m_mdid_dest->Serialize(xml_serializer, CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastDestType));
 	m_mdid_cast_func->Serialize(xml_serializer, CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastFuncId));
 	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastCoercePathType), m_path_type);
-
+    xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCoerceContext), m_cast_context);
 	xml_serializer->CloseElement(CDXLTokens::GetDXLTokenStr(EdxltokenNamespacePrefix), 
 						CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCast));
 }

@@ -44,7 +44,7 @@ namespace gpopt
 
 			// does a cast object between given source and destination types exist
 			static
-			BOOL FCastExists(CMDAccessor *md_accessor, IMDId *mdid_src, IMDId *mdid_dest, BOOL allowassignment = false);
+			BOOL FCastExists(CMDAccessor *md_accessor, IMDId *mdid_src, IMDId *mdid_dest);
 
 			// does a scalar comparison object between given types exist
 			static

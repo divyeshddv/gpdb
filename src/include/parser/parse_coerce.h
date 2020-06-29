@@ -88,6 +88,9 @@ extern Oid resolve_generic_type(Oid declared_type,
 					 Oid context_actual_type,
 					 Oid context_declared_type);
 
+extern CoercionContext find_coercion_context(Oid targetTypeId,
+Oid sourceTypeId);
+
 extern CoercionPathType find_coercion_pathway(Oid targetTypeId,
 					  Oid sourceTypeId,
 					  CoercionContext ccontext,

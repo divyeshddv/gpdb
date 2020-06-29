@@ -60,7 +60,8 @@ namespace gpmd
 				INT type_modifier,
 				BOOL is_explicit,
 				EdxlCoercionForm dxl_coerce_format,
-				INT location
+				INT location,
+                EmdCoerceContext cast_context
 				);
 
 			// dtor

@@ -55,8 +55,8 @@ namespace gpmd
 			// destination type
 			IMDId *m_mdid_dest;
         
-            //allow assigment casts
-            BOOL m_allow_assignment;
+            // coercion path type
+            EmdCoerceContext m_cast_context;
 			
 			// is cast between binary coercible types, i.e. the types are binary compatible
 			BOOL m_is_binary_coercible;
@@ -79,7 +79,7 @@ namespace gpmd
 				BOOL is_binary_coercible,
 				IMDId *mdid_cast_func,
 				EmdCoercepathType path_type = EmdtNone,
-                BOOL allowassignment = false
+                EmdCoerceContext castcontext = EmdtNoContext
 				);
         
 			// dtor
@@ -116,10 +116,10 @@ namespace gpmd
 			// return the coercion path type
 			virtual
 			EmdCoercepathType GetMDPathType() const;
-        
-            //return if assignment is allowed
+            
+            // return the coercion context
             virtual
-            BOOL IsAssignmentAllowed() const;
+            EmdCoerceContext GetMDContext() const;
 
 			// cast function id
 			virtual 

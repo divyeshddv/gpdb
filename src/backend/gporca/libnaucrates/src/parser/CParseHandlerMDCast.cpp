@@ -127,8 +127,17 @@ CParseHandlerMDCast::StartElement
 															EdxltokenGPDBCast,
 															true		// coerce_path_type is optional
 															);
+    IMDCast::EmdCoerceContext cast_context = (IMDCast::EmdCoerceContext)
+    CDXLOperatorFactory::ExtractConvertAttrValueToInt
+            (
+            m_parse_handler_mgr->GetDXLMemoryManager(),
+            attrs,
+            EdxltokenGPDBCoerceContext,
+            EdxltokenGPDBCast,
+            true        // coerce_path_type is optional
+            );
 
-	m_imd_obj = GPOS_NEW(m_mp) CMDCastGPDB(m_mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, mdid_cast_func, coerce_path_type);
+	m_imd_obj = GPOS_NEW(m_mp) CMDCastGPDB(m_mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, mdid_cast_func, coerce_path_type, cast_context);
 }
 
 //---------------------------------------------------------------------------

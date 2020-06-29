@@ -34,10 +34,11 @@ CMDArrayCoerceCastGPDB::CMDArrayCoerceCastGPDB
 	INT type_modifier,
 	BOOL is_explicit,
 	EdxlCoercionForm dxl_coerce_format,
-	INT location
+	INT location,
+    EmdCoerceContext cast_context
 	)
 	:
-	CMDCastGPDB(mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, mdid_cast_func, path_type),
+	CMDCastGPDB(mp, mdid, mdname, mdid_src, mdid_dest, is_binary_coercible, mdid_cast_func, path_type, cast_context),
 	m_type_modifier(type_modifier),
 	m_is_explicit(is_explicit),
 	m_dxl_coerce_format(dxl_coerce_format),
@@ -97,6 +98,7 @@ CMDArrayCoerceCastGPDB::Serialize
 
 	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastCoercePathType), m_path_type);
 	xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastBinaryCoercible), m_is_binary_coercible);
+    xml_serializer->AddAttribute(CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCoerceContext), m_cast_context);
 
 	m_mdid_src->Serialize(xml_serializer, CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastSrcType));
 	m_mdid_dest->Serialize(xml_serializer, CDXLTokens::GetDXLTokenStr(EdxltokenGPDBCastDestType));

@@ -132,7 +132,7 @@ CCastUtils::PexprCast
 	GPOS_ASSERT(NULL != mdid_dest);
 
     IMDId *mdid_src = colref->RetrieveType()->MDId();
-	GPOS_ASSERT(CMDAccessorUtils::FCastExists(md_accessor, mdid_src, mdid_dest));
+	GPOS_ASSERT(CMDAccessorUtils::FImplicitCastExists(md_accessor, mdid_src, mdid_dest));
 
 	const IMDCast *pmdcast = md_accessor->Pmdcast(mdid_src, mdid_dest);
 
@@ -283,8 +283,8 @@ CCastUtils::PexprAddCast
     CExpression *pexprNewPred = NULL;
 
     BOOL fTypesEqual = mdid_type_left->Equals(mdid_type_right);
-    BOOL fCastLtoR = CMDAccessorUtils::FCastExists(md_accessor, mdid_type_left, mdid_type_right);
-    BOOL fCastRtoL = CMDAccessorUtils::FCastExists(md_accessor, mdid_type_right, mdid_type_left);
+    BOOL fCastLtoR = CMDAccessorUtils::FImplicitCastExists(md_accessor, mdid_type_left, mdid_type_right);
+    BOOL fCastRtoL = CMDAccessorUtils::FImplicitCastExists(md_accessor, mdid_type_right, mdid_type_left);
 
     if (fTypesEqual || !(fCastLtoR || fCastRtoL))
     {

@@ -24,6 +24,7 @@
 
 #include "naucrates/md/IMDAggregate.h"
 #include "naucrates/md/IMDScCmp.h"
+#include "naucrates/md/IMDCast.h"
 #include "naucrates/md/IMDFunction.h"
 #include "naucrates/md/IMDScalarOp.h"
 #include "naucrates/md/CMDIdGPDB.h"
@@ -220,14 +221,14 @@ CMDAccessorUtils::GetScCmpMdIdConsiderCasts
 
 	// left op cast(right)
 	if (CMDAccessorUtils::FCmpExists(md_accessor, left_mdid, left_mdid, cmp_type) &&
-		CMDAccessorUtils::FCastExists(md_accessor, right_mdid, left_mdid))
+		CMDAccessorUtils::FImplicitCastExists(md_accessor, right_mdid, left_mdid))
 	{
 		return CMDAccessorUtils::GetScCmpMdid(md_accessor, left_mdid, left_mdid, cmp_type);
 	}
 
 	// cast(left) op right
 	if (CMDAccessorUtils::FCmpExists(md_accessor, right_mdid, right_mdid, cmp_type) &&
-		CMDAccessorUtils::FCastExists(md_accessor, left_mdid, right_mdid))
+		CMDAccessorUtils::FImplicitCastExists(md_accessor, left_mdid, right_mdid))
 	{
 		return CMDAccessorUtils::GetScCmpMdid(md_accessor, right_mdid, right_mdid, cmp_type);
 	}
@@ -295,7 +296,7 @@ CMDAccessorUtils::ApplyCastsForScCmp
 	if (!op_left_mdid->Equals(left_mdid))
 	{
 		// We are in case b).
-		if (CMDAccessorUtils::FCastExists(md_accessor, left_mdid, op_left_mdid))
+		if (CMDAccessorUtils::FImplicitCastExists(md_accessor, left_mdid, op_left_mdid))
 		{
 			// The simple case, a direct cast exists
 			pexprLeft = CUtils::PexprCast(mp, md_accessor, pexprLeft, op_left_mdid);
@@ -303,13 +304,13 @@ CMDAccessorUtils::ApplyCastsForScCmp
 		else
 		{
 			// validate proposition B
-			GPOS_ASSERT(CMDAccessorUtils::FCastExists(md_accessor, left_mdid, right_mdid));
+			GPOS_ASSERT(CMDAccessorUtils::FImplicitCastExists(md_accessor, left_mdid, right_mdid));
 			// Create the two casts described above, first from left to right type
 			pexprLeft = CUtils::PexprCast(mp, md_accessor, pexprLeft, right_mdid);
 			if (!right_mdid->Equals(op_left_mdid))
 			{
 				// validate proposition A
-				GPOS_ASSERT(CMDAccessorUtils::FCastExists(md_accessor, right_mdid, op_left_mdid));
+				GPOS_ASSERT(CMDAccessorUtils::FImplicitCastExists(md_accessor, right_mdid, op_left_mdid));
 				// and then from right type to the type the comparison operator expects
 				pexprLeft = CUtils::PexprCast(mp, md_accessor, pexprLeft, op_left_mdid);
 			}
@@ -382,7 +383,46 @@ CMDAccessorUtils::FCastExists
 	GPOS_CATCH_END;
 }
 
+//---------------------------------------------------------------------------
+//    @function:
+//        CMDAccessorUtils::FImplicitCastExists
+//
+//    @doc:
+//        Does if a cast object between given source and destination types exists
+//
+//---------------------------------------------------------------------------
+BOOL
+CMDAccessorUtils::FImplicitCastExists
+    (
+    CMDAccessor *md_accessor,
+    IMDId *mdid_src,
+    IMDId *mdid_dest
+    )
+{
+    GPOS_ASSERT(NULL != md_accessor);
+    GPOS_ASSERT(NULL != mdid_src);
+    GPOS_ASSERT(NULL != mdid_dest);
 
+    CAutoTraceFlag atf1(EtraceSimulateOOM, false);
+    CAutoTraceFlag atf2(EtraceSimulateAbort, false);
+    CAutoTraceFlag atf3(EtraceSimulateIOError, false);
+    CAutoTraceFlag atf4(EtraceSimulateNetError, false);
+
+    GPOS_TRY
+    {
+        const IMDCast *pmdcast =  md_accessor->Pmdcast(mdid_src, mdid_dest);
+        return ((pmdcast->GetMDContext() == IMDCast::EmdtImplicit) | (pmdcast->IsBinaryCoercible()));
+        
+    }
+    GPOS_CATCH_EX(ex)
+    {
+        GPOS_ASSERT(GPOS_MATCH_EX(ex, gpdxl::ExmaMD, gpdxl::ExmiMDCacheEntryNotFound));
+        GPOS_RESET_EX;
+
+        return false;
+    }
+    GPOS_CATCH_END;
+}
 
 //---------------------------------------------------------------------------
 //	@function:

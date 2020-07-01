@@ -2954,7 +2954,7 @@ CTranslatorDXLToExpr::PexprScalarFunc
 		}
 	}
 
-	if (CTranslatorDXLToExprUtils::FCastFunc(m_pmda, pdxlnFunc, pmdidInput)) // check for implicit casts
+	if (CTranslatorDXLToExprUtils::FCastFunc(m_pmda, pdxlnFunc, pmdidInput))
 	{
 		const IMDCast *pmdcast = m_pmda->Pmdcast(pmdidInput, mdid_return_type);
         if ((pmdcast->GetMDContext() == IMDCast::EmdtImplicit) || (pmdcast->GetMDContext() == IMDCast::EmdtAssignment))

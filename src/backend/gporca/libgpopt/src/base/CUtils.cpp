@@ -4089,7 +4089,7 @@ CUtils::PexprCast
 {
 	GPOS_ASSERT(NULL != mdid_dest);
 	IMDId *mdid_src = CScalar::PopConvert(pexpr->Pop())->MdidType();
-	GPOS_ASSERT(CMDAccessorUtils::FCastExists(md_accessor, mdid_src, mdid_dest));
+	GPOS_ASSERT(CMDAccessorUtils::FImplicitCastExists(md_accessor, mdid_src, mdid_dest));
 	
 	const IMDCast *pmdcast = md_accessor->Pmdcast(mdid_src, mdid_dest);
 	

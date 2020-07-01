@@ -42,9 +42,13 @@ namespace gpopt
 			static
 			IMDId *PmdidWindowReturnType(CMDAccessor *md_accessor, IMDId *mdid);
 
-			// does a cast object between given source and destination types exist
+			// does any cast object between given source and destination types exist
 			static
 			BOOL FCastExists(CMDAccessor *md_accessor, IMDId *mdid_src, IMDId *mdid_dest);
+        
+            // does an implicit cast object between given source and destination types exist
+            static
+            BOOL FImplicitCastExists(CMDAccessor *md_accessor, IMDId *mdid_src, IMDId *mdid_dest);
 
 			// does a scalar comparison object between given types exist
 			static

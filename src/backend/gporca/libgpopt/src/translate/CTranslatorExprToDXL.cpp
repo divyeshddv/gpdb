@@ -5302,7 +5302,7 @@ CTranslatorExprToDXL::PdxlnScCmpPartKey
 		// If the pexprPartKey is not comparable with pexprOther, but can be casted to pexprOther,
 		// and not yet casted, then we add a cast on top of pexprPartKey.
 		if (!CMDAccessorUtils::FCmpExists(m_pmda, pmdidTypePartKey, pmdidTypeOther, cmp_type)
-			&& CMDAccessorUtils::FCastExists(m_pmda, pmdidTypePartKey, pmdidTypeOther)
+			&& CMDAccessorUtils::FImplicitCastExists(m_pmda, pmdidTypePartKey, pmdidTypeOther)
 			&& COperator::EopScalarCast != pexprPartKey->Pop()->Eopid())
 		{
 			pexprNewPartKey = CUtils::PexprCast(m_mp, m_pmda, pexprPartKey, pmdidTypeOther);

@@ -2143,7 +2143,7 @@ IsBinaryCoercible(Oid srctype, Oid targettype)
 	castForm = (Form_pg_cast) GETSTRUCT(tuple);
 
 	result = (castForm->castmethod == COERCION_METHOD_BINARY &&
-			  castForm->castcontext == COERCION_CODE_IMPLICIT);
+              (castForm->castcontext == COERCION_CODE_IMPLICIT | castForm->castcontext == COERCION_CODE_ASSIGNMENT) );
 
 	ReleaseSysCache(tuple);
 
@@ -2216,6 +2216,7 @@ find_coercion_context(Oid targetTypeId, Oid sourceTypeId)
                 castcontext = 0;    /* keep compiler quiet */
                 break;
         }
+        ReleaseSysCache(tuple);
     }
     return castcontext;
 }

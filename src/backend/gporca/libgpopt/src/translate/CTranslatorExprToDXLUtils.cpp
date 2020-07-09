@@ -961,6 +961,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 	IMDId *pmdidTypeOther,
 	IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func,
+    IMDCast::EmdCoerceContext castContext,
 	IMDType::ECmpType cmp_type,
 	ULONG ulPartLevel
 	)
@@ -976,6 +977,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 				pmdidTypeOther,
 				pmdidTypeCastExpr,
 				mdid_cast_func,
+                castContext,
 				ulPartLevel
 				);
 	}
@@ -1007,12 +1009,17 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 	
 	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
-	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
+    
+    if (castContext == IMDCast::EmdtImplicit || castContext == IMDCast:: EmdtNoContext)
+    {
+        CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 
-	CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
-	
-	// return the final predicate in the form "(point <= col and colIncluded) or point < col" / "(point >= col and colIncluded) or point > col"
-	return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor), pdxlnPredicateInclusive, pdxlnPredicateExclusive);
+        CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
+        
+        // return the final predicate in the form "(point <= col and colIncluded) or point < col" / "(point >= col and colIncluded) or point > col"
+        return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor), pdxlnPredicateInclusive, pdxlnPredicateExclusive);
+    }
+    return pdxlnInclusiveCmp;
 }
 
 //---------------------------------------------------------------------------
@@ -1033,12 +1040,13 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterEqCmp
 	IMDId *pmdidTypeOther,
 	IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func,
+    IMDCast::EmdCoerceContext castContext,
 	ULONG ulPartLevel
 	)
 {
-	CDXLNode *pdxlnPredicateMin = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, ulPartLevel, true /*fLowerBound*/, IMDType::EcmptL);
+	CDXLNode *pdxlnPredicateMin = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, castContext, ulPartLevel, true /*fLowerBound*/, IMDType::EcmptL);
 	pdxlnScalar->AddRef();
-	CDXLNode *pdxlnPredicateMax = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, ulPartLevel, false /*fLowerBound*/, IMDType::EcmptG);
+	CDXLNode *pdxlnPredicateMax = PdxlnRangeFilterPartBound(mp, md_accessor, pdxlnScalar, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func, castContext, ulPartLevel, false /*fLowerBound*/, IMDType::EcmptG);
 		
 	// return the conjunction of the predicate for the lower and upper bounds
 	return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnPredicateMin, pdxlnPredicateMax);
@@ -1064,6 +1072,7 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 	IMDId *pmdidTypeOther,
 	IMDId *pmdidTypeCastExpr,
 	IMDId *mdid_cast_func,
+    IMDCast::EmdCoerceContext castContext,
 	ULONG ulPartLevel,
 	ULONG fLowerBound,
 	IMDType::ECmpType cmp_type
@@ -1077,17 +1086,22 @@ CTranslatorExprToDXLUtils::PdxlnRangeFilterPartBound
 		ecmptInc = IMDType::EcmptGEq;
 	}
 
-	CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
-
-	pdxlnScalar->AddRef();
 	CDXLNode *pdxlnInclusiveCmp = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, ecmptInc, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
 	
-	CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
 	
-	CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
-	
-	// return the final predicate in the form "(point <= col and colIncluded) or point < col" / "(point >= col and colIncluded) or point > col"
-	return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor), pdxlnPredicateInclusive, pdxlnPredicateExclusive);
+    if (castContext == IMDCast::EmdtImplicit || castContext == IMDCast:: EmdtNoContext)
+    {
+        pdxlnScalar->AddRef();
+        CDXLNode *pdxlnPredicateExclusive = PdxlnCmp(mp, md_accessor, ulPartLevel, fLowerBound, pdxlnScalar, cmp_type, pmdidTypePartKey, pmdidTypeOther, pmdidTypeCastExpr, mdid_cast_func);
+        
+        CDXLNode *pdxlnInclusiveBoolPredicate = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarPartBoundInclusion(mp, ulPartLevel, fLowerBound));
+        
+        CDXLNode *pdxlnPredicateInclusive = GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxland), pdxlnInclusiveCmp, pdxlnInclusiveBoolPredicate);
+        
+        // return the final predicate in the form "(point <= col and colIncluded) or point < col" / "(point >= col and colIncluded) or point > col"
+        return GPOS_NEW(mp) CDXLNode(mp, GPOS_NEW(mp) CDXLScalarBoolExpr(mp, Edxlor), pdxlnPredicateInclusive, pdxlnPredicateExclusive);
+    }
+	return pdxlnInclusiveCmp;
 }
 
 
@@ -2444,7 +2458,8 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
 	(
 	COperator *pop, 
 	IMDId **ppmdidType, 
-	IMDId **ppmdidCastFunc
+	IMDId **ppmdidCastFunc,
+    IMDCast::EmdCoerceContext *pcastContext
 	)
 {
 	GPOS_ASSERT(NULL != pop);
@@ -2461,6 +2476,7 @@ CTranslatorExprToDXLUtils::ExtractCastMdids
         CScalarCast *popCast = CScalarCast::PopConvert(pop);
         *ppmdidType = popCast->MdidType();
         *ppmdidCastFunc = popCast->FuncMdId();
+        *pcastContext = popCast->GetMDContext();
     }
     if (COperator::EopScalarFunc == pop->Eopid())
    {

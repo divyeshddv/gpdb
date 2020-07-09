@@ -196,6 +196,9 @@ PartTbl-PredicateWithCastMultiLevelList PartTbl-WindowFuncPredPushDown
 PartTbl-WindowFuncPartialPredPushDown PartTbl-WindowFuncNoPredPushDown
 PartTbl-WindowFuncNoDisjunctPredPushDown PartTbl-WindowFuncSinglePredPushDown;
 
+CPartCastTest:
+AssignCast_RangePartEq;
+
 CPartTblDPETest:
 PartTbl-AvoidRangePred-DPE PartTbl-DPE-Correlated-NLOuter
 PartTbl-DPE PartTbl-DPE-WindowFunction PartTbl-DPE-GroupBy PartTbl-DPE-Limit

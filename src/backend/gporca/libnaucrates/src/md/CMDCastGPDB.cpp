@@ -165,7 +165,7 @@ CMDCastGPDB::IsBinaryCoercible() const
 }
 
 // returns coercion context
-IMDCast::EmdCoerceContext
+IMDCast::EmdCoerceContext 
 CMDCastGPDB::GetMDContext() const
 {
 	return m_cast_context;

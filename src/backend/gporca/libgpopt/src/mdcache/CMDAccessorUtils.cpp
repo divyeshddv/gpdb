@@ -320,7 +320,7 @@ CMDAccessorUtils::ApplyCastsForScCmp
 	if (!op_right_mdid->Equals(right_mdid))
 	{
 		// We are in case b).
-		if (CMDAccessorUtils::FCastExists(md_accessor, right_mdid, op_right_mdid))
+		if (CMDAccessorUtils::FImplicitCastExists(md_accessor, right_mdid, op_right_mdid))
 		{
 			// The simple case, a direct cast exists
 			pexprRight = CUtils::PexprCast(mp, md_accessor, pexprRight, op_right_mdid);
@@ -328,13 +328,13 @@ CMDAccessorUtils::ApplyCastsForScCmp
 		else
 		{
 			// validate proposition B
-			GPOS_ASSERT(CMDAccessorUtils::FCastExists(md_accessor, right_mdid, left_mdid));
+			GPOS_ASSERT(CMDAccessorUtils::FImplicitCastExists(md_accessor, right_mdid, left_mdid));
 			// Create the two casts described above, first from right to left type
 			pexprRight = CUtils::PexprCast(mp, md_accessor, pexprRight, left_mdid);
 			if (!left_mdid->Equals(op_right_mdid))
 			{
 				// validate proposition A
-				GPOS_ASSERT(CMDAccessorUtils::FCastExists(md_accessor, left_mdid, op_right_mdid));
+				GPOS_ASSERT(CMDAccessorUtils::FImplicitCastExists(md_accessor, left_mdid, op_right_mdid));
 				// and then from left type to the type the comparison operator expects
 				pexprRight = CUtils::PexprCast(mp, md_accessor, pexprRight, op_right_mdid);
 			}
@@ -411,7 +411,7 @@ CMDAccessorUtils::FImplicitCastExists
     GPOS_TRY
     {
         const IMDCast *pmdcast =  md_accessor->Pmdcast(mdid_src, mdid_dest);
-        return ((pmdcast->GetMDContext() == IMDCast::EmdtImplicit) | (pmdcast->IsBinaryCoercible()));
+        return ((pmdcast->GetMDContext() == IMDCast::EmdtImplicit) || (pmdcast->GetMDContext() == IMDCast:: EmdtNoContext) || (pmdcast->IsBinaryCoercible()));
         
     }
     GPOS_CATCH_EX(ex)

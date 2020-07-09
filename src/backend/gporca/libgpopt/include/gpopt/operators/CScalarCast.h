@@ -16,6 +16,8 @@
 #include "gpopt/operators/CScalar.h"
 #include "gpopt/base/CDrvdProp.h"
 
+#include "naucrates/md/IMDCast.h"
+
 namespace gpopt
 {
 	using namespace gpos;
@@ -32,6 +34,15 @@ namespace gpopt
 	{
 
 		private:
+        
+//           // coercion context
+//            enum EmdCoerceContext
+//            {
+//                EmdtNoContext,        /* found no coercion path */
+//                EmdtImplicit,        /* found an implicit coercion */
+//                EmdtAssignment,      /* found an assignment coercion */
+//                EmdtExplicit         /* found an explicit coercion */
+//            };
 
 			// return type metadata id in the catalog
 			IMDId *m_return_type_mdid;
@@ -47,6 +58,9 @@ namespace gpopt
 
 			// is operator's return type BOOL?
 			BOOL m_fBoolReturnType;
+        
+            // coercion context
+            IMDCast::EmdCoerceContext m_cast_context;
 
 			// private copy ctor
 			CScalarCast(const CScalarCast &);
@@ -59,7 +73,8 @@ namespace gpopt
 				CMemoryPool *mp,
 				IMDId *return_type_mdid,
 				IMDId *mdid_func,
-				BOOL is_binary_coercible
+				BOOL is_binary_coercible,
+                IMDCast::EmdCoerceContext cast_context
 				);
 
 			// dtor
@@ -127,6 +142,13 @@ namespace gpopt
 			{
 				return m_is_binary_coercible;
 			}
+        
+            // return the coercion context
+            virtual
+            IMDCast::EmdCoerceContext GetMDContext() const
+            {
+                return m_cast_context;
+            }
 			
 
 			// boolean expression evaluation

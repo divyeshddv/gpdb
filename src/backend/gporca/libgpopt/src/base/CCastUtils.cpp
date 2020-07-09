@@ -161,7 +161,7 @@ CCastUtils::PexprCast
 	}
 	else
 	{
-		CScalarCast *popCast = GPOS_NEW(mp) CScalarCast(mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible());
+		CScalarCast *popCast = GPOS_NEW(mp) CScalarCast(mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible(), pmdcast->GetMDContext());
 		pexpr = GPOS_NEW(mp) CExpression(mp, popCast, CUtils::PexprScalarIdent(mp, colref));
 	}
 	return pexpr;
@@ -350,7 +350,7 @@ CCastUtils::PexprCast
     }
     else
     {
-        CScalarCast *popCast = GPOS_NEW(mp) CScalarCast(mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible());
+        CScalarCast *popCast = GPOS_NEW(mp) CScalarCast(mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible(), pmdcast->GetMDContext());
         pexprCast = GPOS_NEW(mp) CExpression(mp, popCast, pexpr);
     }
 

@@ -323,6 +323,7 @@ namespace gpopt
 				IMDId *pmdidTypeOther,
 				IMDId *pmdidTypeCastExpr,
 				IMDId *mdid_cast_func,
+                IMDCast::EmdCoerceContext castContext,
 				IMDType::ECmpType cmp_type,
 				ULONG ulPartLevel
 				);
@@ -338,6 +339,7 @@ namespace gpopt
 				IMDId *pmdidTypeOther,
 				IMDId *pmdidTypeCastExpr,
 				IMDId *mdid_cast_func,
+                IMDCast::EmdCoerceContext castContext,
 				ULONG ulPartLevel
 				);
 			
@@ -352,6 +354,7 @@ namespace gpopt
 				IMDId *pmdidTypeOther,
 				IMDId *pmdidTypeCastExpr,
 				IMDId *mdid_cast_func,
+                IMDCast::EmdCoerceContext castContext,
 				ULONG ulPartLevel,
 				ULONG fLowerBound,
 				IMDType::ECmpType cmp_type
@@ -543,7 +546,7 @@ namespace gpopt
 			
 			// if operator is a scalar cast, extract cast type and function
 			static 
-			void ExtractCastMdids(COperator *pop, IMDId **ppmdidType, IMDId **ppmdidCastFunc);
+			void ExtractCastMdids(COperator *pop, IMDId **ppmdidType, IMDId **ppmdidCastFunc, IMDCast::EmdCoerceContext *pcastContext);
 
 			// produce DXL representation of a datum
 			static

@@ -79,7 +79,7 @@ namespace gpmd
 				BOOL is_binary_coercible,
 				IMDId *mdid_cast_func,
 				EmdCoercepathType path_type = EmdtNone,
-                EmdCoerceContext castcontext = EmdtNoContext
+                EmdCoerceContext castcontext = EmdtImplicit
 				);
         
 			// dtor

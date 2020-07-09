@@ -111,14 +111,16 @@ CParseHandlerMDArrayCoerceCast::StartElement
 															EdxltokenGPDBCastCoercePathType,
 															EdxltokenGPDBArrayCoerceCast
 															);
-    // parse coercion path type
+    // parse coercion context
     IMDCast::EmdCoerceContext cast_context = (IMDCast::EmdCoerceContext)
                                                     CDXLOperatorFactory::ExtractConvertAttrValueToInt
                                                             (
                                                             m_parse_handler_mgr->GetDXLMemoryManager(),
                                                             attrs,
                                                             EdxltokenGPDBCoerceContext,
-                                                            EdxltokenGPDBArrayCoerceCast
+                                                            EdxltokenGPDBArrayCoerceCast,
+                                                             true, //optional
+                                                             IMDCast::EmdtImplicit //default values if not found
                                                             );
 
 	INT type_modifier = CDXLOperatorFactory::ExtractConvertAttrValueToInt

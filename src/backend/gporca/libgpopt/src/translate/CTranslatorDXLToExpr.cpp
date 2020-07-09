@@ -770,7 +770,7 @@ CTranslatorDXLToExpr::PexprCastPrjElem
 			GPOS_NEW(m_mp) CExpression
 			(
 				m_mp,
-				GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible()),
+				GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible(), pmdcast->GetMDContext()),
 				GPOS_NEW(m_mp) CExpression(m_mp, GPOS_NEW(m_mp) CScalarIdent(m_mp, pcrToCast))
 			);
 	}
@@ -2980,9 +2980,21 @@ CTranslatorDXLToExpr::PexprScalarFunc
                         m_mp,
                         mdid_return_type,
                         mdid_func,
-                        pmdcast->IsBinaryCoercible()
+                        pmdcast->IsBinaryCoercible(),
+                        pmdcast->GetMDContext()
                         );
             }
+        }
+        else
+        {
+            pop = GPOS_NEW(m_mp) CScalarFunc
+				(
+				m_mp,
+				mdid_func,
+				mdid_return_type,
+				pdxlopFuncExpr->TypeModifier(),
+				GPOS_NEW(m_mp) CWStringConst(m_mp, (pmdfunc->Mdname().GetMDName())->GetBuffer())
+				);
         }
 	}
     else
@@ -3663,6 +3675,7 @@ CTranslatorDXLToExpr::PexprScalarCast
 	IMDId *pmdidInput = CScalar::PopConvert(popChild)->MdidType();
 	const IMDCast *pmdcast = m_pmda->Pmdcast(pmdidInput, mdid_type);
 	BOOL fRelabel = pmdcast->IsBinaryCoercible();
+    IMDCast::EmdCoerceContext castcontext = pmdcast->GetMDContext();
 
 	CExpression *pexpr;
 	
@@ -3691,7 +3704,7 @@ CTranslatorDXLToExpr::PexprScalarCast
 		pexpr= GPOS_NEW(m_mp) CExpression
 									(
 									m_mp,
-									GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_type, mdid_func, fRelabel),
+									GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_type, mdid_func, fRelabel, castcontext),
 									pexprChild
 									);
 	}

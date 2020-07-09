@@ -81,7 +81,7 @@ namespace gpmd
 			virtual
 			EmdCoercepathType GetMDPathType() const = 0;
         
-            // return the coercion path type
+            // return the coercion context
             virtual
             EmdCoerceContext GetMDContext() const = 0;
 	};

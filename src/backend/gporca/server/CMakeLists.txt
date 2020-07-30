@@ -198,7 +198,9 @@ PartTbl-PredicateWithCast PartTbl-EqPredicateWithCastRange
 PartTbl-PredicateWithCastList PartTbl-IDFWithCast
 PartTbl-PredicateWithCastMultiLevelList PartTbl-WindowFuncPredPushDown
 PartTbl-WindowFuncPartialPredPushDown PartTbl-WindowFuncNoPredPushDown
-PartTbl-WindowFuncNoDisjunctPredPushDown PartTbl-WindowFuncSinglePredPushDown
+PartTbl-WindowFuncNoDisjunctPredPushDown PartTbl-WindowFuncSinglePredPushDown;
+
+CPartTableLossyCastTest:
 RangePartLossyCastLTEqOnEndPartitionRange
 RangePartLossyCastLTOnEndPartitionRange
 RangePartLossyCastEqOnEndPartitionRange
@@ -207,8 +209,7 @@ RangePartLossyCastLTInPartitionRange
 RangePartLossyCastEqInPartitionRange
 ListPartLossyCastLT
 ListPartLossyCastEq
-;
-
+ListPartLossyCastNEq;
 
 CPartTblDPETest:
 PartTbl-AvoidRangePred-DPE PartTbl-DPE-Correlated-NLOuter

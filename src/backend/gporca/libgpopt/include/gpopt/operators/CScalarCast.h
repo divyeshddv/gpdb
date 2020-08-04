@@ -48,9 +48,6 @@ namespace gpopt
 			// is operator's return type BOOL?
 			BOOL m_fBoolReturnType;
 
-			// is this a lossy (non-implicit) cast
-			BOOL m_is_lossy_cast;
-
 			// private copy ctor
 			CScalarCast(const CScalarCast &);
 
@@ -62,8 +59,7 @@ namespace gpopt
 				CMemoryPool *mp,
 				IMDId *return_type_mdid,
 				IMDId *mdid_func,
-				BOOL is_binary_coercible,
-				BOOL is_allowed_lossy_cast
+				BOOL is_binary_coercible
 				);
 
 			// dtor
@@ -131,13 +127,6 @@ namespace gpopt
 			{
 				return m_is_binary_coercible;
 			}
-
-			// whether this is a lossy (non-implicit) cast
-			BOOL IsLossyCast() const
-			{
-				return m_is_lossy_cast;
-			}
-			
 
 			// boolean expression evaluation
 			virtual

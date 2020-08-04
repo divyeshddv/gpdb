@@ -5111,7 +5111,7 @@ CTranslatorExprToDXL::ConstructLevelFilters4PartitionSelector
 								pmdidTypeOther,
 								NULL /*pmdidTypeCastExpr*/,
 								NULL /*mdid_cast_func*/,
-								false, /*is a lossy cast*/
+								false, /*is a lossy cast allowed for PS*/
 								ulLevel
 								);
 			}
@@ -5406,7 +5406,6 @@ CTranslatorExprToDXL::PdxlnScCmpPartKey
 	IMDId *pmdidTypeOther = CScalar::PopConvert(pexprOther->Pop())->MdidType();
 	IMDId *pmdidTypeCastExpr = NULL;
 	IMDId *mdid_cast_func = NULL;
-	BOOL is_allowed_lossy_cast = false;
 
 	if (fRangePart) // range partition
 	{
@@ -5422,8 +5421,9 @@ CTranslatorExprToDXL::PdxlnScCmpPartKey
 			pexprPartKey->Release();
 		}
 
-		//Extract cast function, and whether it is a lossy cast
-		CTranslatorExprToDXLUtils::ExtractCastMdids(pexprNewPartKey->Pop(), &pmdidTypeCastExpr, &mdid_cast_func, &is_allowed_lossy_cast);
+		//Extract cast/func details
+		CTranslatorExprToDXLUtils::ExtractCastFuncMdids(pexprNewPartKey->Pop(), &pmdidTypeCastExpr, &mdid_cast_func);
+		BOOL is_allowed_lossy_cast = (COperator::EopScalarFunc == pexprPartKey->Pop()->Eopid());
 
 		return CTranslatorExprToDXLUtils::PdxlnRangeFilterScCmp
 								(

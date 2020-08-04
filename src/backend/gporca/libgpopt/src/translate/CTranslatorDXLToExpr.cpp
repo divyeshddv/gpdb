@@ -770,7 +770,7 @@ CTranslatorDXLToExpr::PexprCastPrjElem
 			GPOS_NEW(m_mp) CExpression
 			(
 				m_mp,
-				GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible(), false /* is lossy cast*/),
+				GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_dest, pmdcast->GetCastFuncMdId(), pmdcast->IsBinaryCoercible()),
 				GPOS_NEW(m_mp) CExpression(m_mp, GPOS_NEW(m_mp) CScalarIdent(m_mp, pcrToCast))
 			);
 	}
@@ -2979,21 +2979,9 @@ CTranslatorDXLToExpr::PexprScalarFunc
 					m_mp,
 					mdid_return_type,
 					mdid_func,
-					pmdcast->IsBinaryCoercible(),
-					false /* is lossy cast */
+					pmdcast->IsBinaryCoercible()
 					);
 		}
-	}
-	else if (pmdfunc->IsAllowedForPS())
-	{
-		pop = GPOS_NEW(m_mp) CScalarCast
-		(
-		 m_mp,
-		 mdid_return_type,
-		 mdid_func,
-		 false, /* is binary coercible */
-		 true /* is lossy cast */
-		 );
 	}
 	else
 	{
@@ -3701,7 +3689,7 @@ CTranslatorDXLToExpr::PexprScalarCast
 		pexpr= GPOS_NEW(m_mp) CExpression
 									(
 									m_mp,
-									GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_type, mdid_func, fRelabel, false /* is lossy cast */),
+									GPOS_NEW(m_mp) CScalarCast(m_mp, mdid_type, mdid_func, fRelabel),
 									pexprChild
 									);
 	}

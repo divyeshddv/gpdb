@@ -826,12 +826,25 @@ CTranslatorExprToDXLUtils::PdxlnListFilterPartKey
 								)
 						);
 	}
-	else if (CScalarIdent::FCastedScId(pexprPartKey))
+	else if (CScalarIdent::FCastedScId(pexprPartKey) || CScalarIdent::FAllowedFuncScId(pexprPartKey))
 	{
-		// ScalarCast(ScalarIdent) - create an ArrayCoerceExpr over a ScalarPartListValues
-		CScalarCast *pexprScalarCast = CScalarCast::PopConvert(pexprPartKey->Pop());
-		IMDId *pmdidDestElem = pexprScalarCast->MdidType();
-		IMDId *pmdidArrayCastFunc = pexprScalarCast->FuncMdId();
+		IMDId *pmdidDestElem;
+		IMDId *pmdidArrayCastFunc;
+		if (CScalarIdent::FCastedScId(pexprPartKey))
+		{
+			// ScalarCast(ScalarIdent) - create an ArrayCoerceExpr over a ScalarPartListValues
+			CScalarCast *pexprScalarCast = CScalarCast::PopConvert(pexprPartKey->Pop());
+			pmdidDestElem = pexprScalarCast->MdidType();
+			pmdidArrayCastFunc = pexprScalarCast->FuncMdId();
+		}
+
+		if (CScalarIdent::FAllowedFuncScId(pexprPartKey))
+		{
+			// PS Allowed ScalarFunc(ScalarIdent) - create an ArrayCoerceExpr over a ScalarPartListValues
+			CScalarFunc *pexprScalarFunc = CScalarFunc::PopConvert(pexprPartKey->Pop());
+			pmdidDestElem = pexprScalarFunc->MdidType();
+			pmdidArrayCastFunc = pexprScalarFunc->FuncMdId();
+		}
 		IMDId *pmdidDestArray = md_accessor->RetrieveType(pmdidDestElem)->GetArrayTypeMdid();
 
 		CScalarIdent *pexprScalarIdent = CScalarIdent::PopConvert((*pexprPartKey)[0]->Pop());
@@ -2450,35 +2463,42 @@ CTranslatorExprToDXLUtils::FLocalHashAggStreamSafe
 
 //---------------------------------------------------------------------------
 //	@function:
-//		CTranslatorExprToDXLUtils::ExtractCastMdids
+//		CTranslatorExprToDXLUtils::ExtractCastFuncMdids
 //
 //	@doc:
-//		If operator is a scalar cast, extract cast type and function,
-//		and whether it is a lossy cast
+//		If operator is a scalar cast/scalar func extract type and function
 //
 //---------------------------------------------------------------------------
 void
-CTranslatorExprToDXLUtils::ExtractCastMdids
+CTranslatorExprToDXLUtils::ExtractCastFuncMdids
 	(
 	COperator *pop, 
 	IMDId **ppmdidType, 
-	IMDId **ppmdidCastFunc,
-	BOOL *is_lossy_cast
+	IMDId **ppmdidCastFunc
 	)
 {
 	GPOS_ASSERT(NULL != pop);
 	GPOS_ASSERT(NULL != ppmdidType);
 	GPOS_ASSERT(NULL != ppmdidCastFunc);
 
-	if (COperator::EopScalarCast != pop->Eopid())
+	if (COperator::EopScalarCast != pop->Eopid() &&
+		COperator::EopScalarFunc != pop->Eopid())
 	{
-		// not a cast
+		// not a cast or allowed func
 		return;
 	}
-	CScalarCast *popCast = CScalarCast::PopConvert(pop);
-	*ppmdidType = popCast->MdidType();
-	*ppmdidCastFunc = popCast->FuncMdId();
-	*is_lossy_cast = popCast->IsLossyCast();
+	if (COperator::EopScalarCast == pop->Eopid())
+	{
+		CScalarCast *popCast = CScalarCast::PopConvert(pop);
+		*ppmdidType = popCast->MdidType();
+		*ppmdidCastFunc = popCast->FuncMdId();
+	}
+	if (COperator::EopScalarFunc == pop->Eopid())
+	{
+		CScalarFunc *popFunc = CScalarFunc::PopConvert(pop);
+		*ppmdidType = popFunc->MdidType();
+		*ppmdidCastFunc = popFunc->FuncMdId();
+	}
 }
 
 BOOL

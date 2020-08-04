@@ -14,6 +14,7 @@
 #include "gpopt/base/CColRefSet.h"
 #include "gpopt/base/CColRefTable.h"
 #include "gpopt/operators/CScalarIdent.h"
+#include "gpopt/operators/CScalarFunc.h"
 
 
 using namespace gpopt;
@@ -187,6 +188,55 @@ CScalarIdent::FCastedScId
 	return colref == pScIdent->Pcr();
 }
 
+//---------------------------------------------------------------------------
+//	@function:
+//		CScalarIdent::FAllowedFuncScId
+//
+//	@doc:
+// 		Is the given expression a scalar func (which is an increasing function allowed for partition selection) of a scalar identifier
+//
+//---------------------------------------------------------------------------
+BOOL
+CScalarIdent::FAllowedFuncScId
+(
+ CExpression *pexpr
+ )
+{
+	GPOS_ASSERT(NULL != pexpr);
+
+	if (COperator::EopScalarFunc == pexpr->Pop()->Eopid())
+	{
+		CScalarFunc *popCast = CScalarFunc::PopConvert(pexpr->Pop());
+		CMDIdGPDB *gpdb_mdid = CMDIdGPDB::CastMdid(popCast->FuncMdId());
+		CMDAccessor *md_accessor = COptCtxt::PoctxtFromTLS()->Pmda();
+		if (COperator::EopScalarIdent == (*pexpr)[0]->Pop()->Eopid())
+		{
+			return (md_accessor->RetrieveFunc(gpdb_mdid)->IsAllowedForPS());
+		}
+	}
+
+	return false;
+}
+
+BOOL
+CScalarIdent::FAllowedFuncScId
+(
+ CExpression *pexpr,
+ CColRef *colref
+ )
+{
+	GPOS_ASSERT(NULL != pexpr);
+	GPOS_ASSERT(NULL != colref);
+
+	if (!FAllowedFuncScId(pexpr))
+	{
+		return false;
+	}
+
+	CScalarIdent *pScIdent = CScalarIdent::PopConvert((*pexpr)[0]->Pop());
+
+	return colref == pScIdent->Pcr();
+}
 //---------------------------------------------------------------------------
 //	@function:
 //		CScalarIdent::OsPrint

@@ -38,8 +38,7 @@ CScalarCast::CScalarCast
 	CMemoryPool *mp,
 	IMDId *return_type_mdid,
 	IMDId *mdid_func,
-	BOOL is_binary_coercible,
-	BOOL is_lossy_cast
+	BOOL is_binary_coercible
 	)
 	:
 	CScalar(mp),
@@ -47,8 +46,7 @@ CScalarCast::CScalarCast
 	m_func_mdid(mdid_func),
 	m_is_binary_coercible(is_binary_coercible),
 	m_returns_null_on_null_input(false),
-	m_fBoolReturnType(false),
-	m_is_lossy_cast(is_lossy_cast)
+	m_fBoolReturnType(false)
 {
 	if (NULL != m_func_mdid && m_func_mdid->IsValid())
 	{

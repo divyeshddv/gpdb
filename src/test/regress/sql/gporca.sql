@@ -2513,6 +2513,12 @@ WHERE L1.lid = META.LOAD_ID;
 reset optimizer_join_order;
 SELECT * from tp;
 
+-- Test partition selection for lossy casts
+create table lossycastrangepart(a float, b float) partition by range(b) (start(0) end(40) every(10));
+insert into lossycastrangepart (values (5.1,5.1), (9.9,9.9), (10.1,10.1), (9.1,9.1), (10.9,10.9), (11.1,11.1), (21.0,21.0)); 
+explain select * from lossycastrangepart where b::int = 10;
+select * from lossycastrangepart where b::int = 10;
+
 -- start_ignore
 DROP SCHEMA orca CASCADE;
 -- end_ignore

@@ -362,6 +362,86 @@ try:
                 if segment.getSegmentContentId() == seg.getSegmentContentId() and segment.getSegmentRole() != seg.getSegmentRole():
                     PgHbaEntriesToUpdate.append((segment.getSegmentDataDirectory(), segment.getSegmentHostName(), newMirror.address))
 
+    """ Check disk space used on old segments"""
+
+    pool = WorkerPool(numWorkers=min(len(newConfig.oldMirrorList), options.batch_size))
+    try:
+        for oldMirror in newConfig.oldMirrorList:
+            cmd = DiskUsage('check old mirror segments disk space used', oldMirror.dataDirectory, ctxt=REMOTE, remoteHost=oldMirror.address)
+            pool.addCommand(cmd)
+        pool.join()
+    except:
+        pool.haltWork()
+        pool.joinWorkers()
+
+    failure = False
+    oldHostSegDiskUsage = {}
+    for cmd in pool.getCompletedItems():
+        if not cmd.was_successful():
+            logging.error("Unable to check disk usage on old mirror segment: " + str(cmd.get_results))
+            failure = True
+        oldHost, oldDiskUsage, oldDatadir = cmd.get_hostname_disk_usage_output()
+        if oldHost not in oldHostSegDiskUsage:
+            oldHostSegDiskUsage[oldHost] = {oldDatadir: oldDiskUsage}
+        else:
+            oldHostSegDiskUsage[oldHost][oldDatadir] = oldDiskUsage
+
+    pool.haltWork()
+    pool.joinWorkers()
+    if failure:
+        logging.error("Unable to check disk usage on old mirror segments")
+        raise Exception("Unable to check disk usage on old mirror segments.")
+
+    """ Check disk space free on new segments"""
+
+    pool = WorkerPool(numWorkers=min(len(newConfig.newMirrorList), options.batch_size))
+    try:
+        for newMirror in newConfig.newMirrorList:
+            cmd = DiskFree('check new mirror segments disk space free', newMirror.dataDirectory, ctxt=REMOTE, remoteHost=newMirror.address)
+            pool.addCommand(cmd)
+        pool.join()
+    except:
+        pool.haltWork()
+        pool.joinWorkers()
+
+    failure = False
+    newDiskAvailable = {}
+    newDatadirFSmap = {}
+    for cmd in pool.getCompletedItems():
+        if not cmd.was_successful():
+            logging.error("Unable to check disk free on new mirror segment: " + str(cmd.get_results))
+            failure = True
+        newResult = cmd.get_hostname_disk_free_output()
+        newHost = newResult[0]
+        newDatadir = newResult[1]
+        newFS = newResult[2]
+        newDiskFree = newResult[5]
+
+        if newHost not in newDatadirFSmap:
+            newDatadirFSmap[newHost] = {newDatadir: newFS}
+        else:
+            newDatadirFSmap[newHost][newDatadir] = newFS
+
+        if newHost not in newDiskAvailable:
+            newDiskAvailable[newHost] = {newFS: newDiskFree}
+        elif newFS not in newDiskAvailable[newHost]:
+            newDiskAvailable[newHost][newFS] = newDiskFree
+
+    pool.haltWork()
+    pool.joinWorkers()
+    if failure:
+        logging.error("Unable to check disk free on new mirror segments")
+        raise Exception("Unable to check disk free on new mirror segments.")
+
+    """Check if new hosts have enough disk space to occupy all new segments"""
+    for oldMirror, newMirror in zip(newConfig.oldMirrorList, newConfig.newMirrorList):
+        oldMirrorDiskReqd = oldHostSegDiskUsage[oldMirror.address][oldMirror.dataDirectory]
+        newFS = newDatadirFSmap[newMirror.address][newMirror.dataDirectory]
+        newDiskAvailable[newMirror.address][newFS] -= oldMirrorDiskReqd
+        if newDiskAvailable[newMirror.address][newFS] <= 0:
+            logging.error("Not enough space on host %s for moving mirror segments" %(newMirror.address))
+            raise Exception("Not enough space on host %s for moving mirror segments." %(newMirror.address))
+
 
     """ Prepare common execution steps for running commands on segments """
     mirrorsToDelete = [mirror for mirror in newConfig.oldMirrorList if not mirror.inPlace]

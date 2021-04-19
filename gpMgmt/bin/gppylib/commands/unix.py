@@ -336,9 +336,7 @@ class Ping(Command):
 class DiskFree(Command):
     def __init__(self, name, directory, ctxt=LOCAL, remoteHost=None):
         self.directory = directory
-        cmdStr = "hostname && echo '%s' && %s %s" % (directory, SYSTEM.getDiskFreeCmd(), directory)
-        if remoteHost is not None:
-            cmdStr = "echo %s && echo '%s' && %s %s" % (remoteHost, directory, SYSTEM.getDiskFreeCmd(), directory)
+        cmdStr = "echo '%s' && %s %s" % (directory, SYSTEM.getDiskFreeCmd(), directory)
         Command.__init__(self, name, cmdStr, ctxt, remoteHost)
 
     @staticmethod
@@ -367,19 +365,17 @@ class DiskFree(Command):
            Returns data in list format:
            ['/dev/disk0s2', '194699744', '158681544', '35506200', '82%', '/']
         '''
-        rawIn = self.results.stdout.split('\n')[3]
+        rawIn = self.results.stdout.split('\n')[2]
         return rawIn.split()
 
-    def get_hostname_disk_free_output(self):
-        '''expected output of the form:
-           Filesystem   512-blocks      Used Available Capacity  Mounted on
-           /dev/disk0s2  194699744 158681544  35506200    82%    /
+    def get_directory(self):
+        return self.results.stdout.split('\n')[0]
 
-           Returns data in list format:
-           ['hostname','/dev/disk0s2', '194699744', '158681544', '35506200', '82%', '/']
-        '''
-        rawIn = self.results.stdout.split('\n')
-        return [rawIn[0], rawIn[1]] + rawIn[3].split()
+    def get_FileSystem(self):
+        return self.get_disk_free_output()[0]
+
+    def get_Kbytes_free(self):
+        return int(self.get_disk_free_output()[3])
 
     def get_bytes_free(self):
         disk_free = self.get_disk_free_output()
@@ -390,9 +386,7 @@ class DiskFree(Command):
 class DiskUsage(Command):
     def __init__(self, name, directory, ctxt=LOCAL, remoteHost=None):
         self.directory = directory
-        cmdStr = "hostname && %s %s" % (SYSTEM.getDiskUsageCmd(), directory)
-        if remoteHost is not None:
-            cmdStr = "echo %s && %s %s" % (remoteHost, SYSTEM.getDiskUsageCmd(), directory)
+        cmdStr = "%s %s" % (SYSTEM.getDiskUsageCmd(), directory)
         Command.__init__(self, name, cmdStr, ctxt, remoteHost)
 
     @staticmethod
@@ -420,22 +414,12 @@ class DiskUsage(Command):
            Returns data in list format:
            ['194699744', '/directory/']
         '''
-        rawIn = self.results.stdout.split('\n')[1]
+        rawIn = self.results.stdout.split('\n')[0]
         return rawIn.split()
-
-    def get_hostname_disk_usage_output(self):
-        '''expected output of the form:
-           194699744  /directory/
-
-           Returns data in list format:
-           ['194699744', '/directory/']
-        '''
-        rawIn = self.results.stdout.split('\n')
-        return [rawIn[0]] + rawIn[1].split()
 
     def get_bytes_used(self):
         disk_usage = self.get_disk_usage_output()
-        bytesUsed = int(disk_usage[1]) * 1024
+        bytesUsed = int(disk_usage[0]) * 1024
         return bytesUsed
 
 # -------------mkdir------------------

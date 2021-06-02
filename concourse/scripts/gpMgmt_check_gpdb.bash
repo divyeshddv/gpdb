@@ -35,7 +35,7 @@ function setup_gpadmin_user() {
 }
 
 function _main() {
-
+    mount -o remount,noexec /tmp
     install_and_configure_gpdb
     setup_gpadmin_user
     make_cluster
